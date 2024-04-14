@@ -1,0 +1,26 @@
+name: AdvancedSkills
+main: kr.toxicity.advancedskills.AdvancedSkillsImpl
+version: ${version}
+author: toxicity
+api-version: 1.17
+description: "A Skill plugin."
+load: POSTWORLD
+folia-supported: true
+softdepend:
+  - MythicMobs
+  - ModelEngine
+libraries:
+  - "net.kyori:adventure-platform-bukkit:${platform}"
+  - "team.unnamed:creative-api:${creative}"
+  - "team.unnamed:creative-serializer-minecraft:${creative}"
+  - "team.unnamed:creative-server:${creative}"
+  - "net.objecthunter:exp4j:0.4.8"
+commands:
+  advancedskills:
+    aliases: as
+    description: AdvancedSkills's reload command.
+    usage: /<command>
+    permission: advancedskills.reload
+permissions:
+  advancedskills.reload:
+    default: op
