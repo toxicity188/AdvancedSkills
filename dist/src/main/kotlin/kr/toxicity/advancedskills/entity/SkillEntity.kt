@@ -2,8 +2,10 @@ package kr.toxicity.advancedskills.entity
 
 import kr.toxicity.advancedskills.equation.EquationLocation
 import kr.toxicity.advancedskills.equation.TEquation
+import kr.toxicity.advancedskills.manager.EntityManager
 import kr.toxicity.advancedskills.util.*
 import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.util.Vector
 import java.util.*
@@ -38,6 +40,8 @@ class SkillEntity(
 
     private var remove = false
 
+    fun locationEntity() = EntityManager.location(world(), location())
+
     constructor(caster: Entity, callback: () -> Unit): this(
         AnimatedTrackable(-1, caster.world, Trackable.of(caster)),
         null,
@@ -49,6 +53,20 @@ class SkillEntity(
         false,
         0
     )
+    constructor(world: World, loc: Location, callback: () -> Unit): this(
+        AnimatedTrackable(-1, world, Trackable.empty(world).apply {
+            location = loc
+        }),
+        null,
+        callback,
+        {
+            loc
+        },
+        zeroLocation,
+        false,
+        0
+    )
+
     private val supplier = ArrayList<EntityLocator>().synchronized()
     private val childes = ArrayList<SkillEntity>().synchronized()
     private val tickTask = ArrayList<(Long) -> Unit>().synchronized()
@@ -89,7 +107,7 @@ class SkillEntity(
         val result = SkillEntity(
             child,
             this,
-            callback,
+            {},
             {
                 trackable.trackable.location
             },

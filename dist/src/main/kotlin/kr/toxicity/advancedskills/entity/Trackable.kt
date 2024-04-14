@@ -64,7 +64,7 @@ interface Trackable {
                 override val world: World
                     get() = world
                 override val available: Boolean
-                    get() = !removed
+                    get() = !removed && loc.chunk.isLoaded
                 override var location: Location
                     get() = loc
                     set(value) {

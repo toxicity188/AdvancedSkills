@@ -19,7 +19,6 @@ class ModelSupplier(section: ConfigurationSection): TrackableSupplier {
             val entity = PLUGIN.nms().createFakeEntity(parent.world())
             val active = ModelEngineAPI.createActiveModel(model)
             ModelEngineAPI.createModeledEntity(entity).addModel(active, true)
-            Trackable.of(entity)
             parent.addChild(
                 AnimatedTrackable(
                     duration,
