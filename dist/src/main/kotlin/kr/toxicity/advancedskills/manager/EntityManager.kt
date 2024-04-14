@@ -12,13 +12,11 @@ import org.bukkit.entity.Entity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.event.world.ChunkUnloadEvent
 import java.util.UUID
 
 object EntityManager: SkillsManager {
 
     private val entityMap = HashMap<UUID, SkillEntity>()
-    private val chunkMap = HashMap<ChunkLoc, SkillEntity>()
 
     private val configMap = HashMap<String, SkillEntityConfiguration>()
 
@@ -27,10 +25,6 @@ object EntityManager: SkillsManager {
             @EventHandler
             fun quit(e: PlayerQuitEvent) {
                 entityMap.remove(e.player.uniqueId)?.cancel()
-            }
-            @EventHandler
-            fun unload(e: ChunkUnloadEvent) {
-                chunkMap.remove(ChunkLoc(e.chunk.x, e.chunk.z))?.cancel()
             }
         }, PLUGIN)
     }
@@ -62,12 +56,5 @@ object EntityManager: SkillsManager {
             entityMap.remove(it)
         }
     }
-    fun location(world: World, location: Location): SkillEntity {
-        val chunk = location.chunk
-        return chunkMap.computeIfAbsent(ChunkLoc(chunk.x, chunk.z)) {
-            SkillEntity(world, location) {
-                chunkMap.remove(it)
-            }
-        }
-    }
+    fun location(world: World, location: Location): SkillEntity = SkillEntity(world, location) {}
 }

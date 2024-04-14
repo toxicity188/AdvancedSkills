@@ -13,6 +13,8 @@ interface Trackable {
     val available: Boolean
     var location: Location
     val async: Boolean
+    val isEmpty: Boolean
+
     fun remove()
 
     companion object {
@@ -30,10 +32,10 @@ interface Trackable {
                 }
             override val async: Boolean
                 get() = true
+            override val isEmpty: Boolean
+                get() = false
             override fun remove() {
-                runCatching {
-                    display.remove()
-                }
+                display.remove()
             }
         }
         fun of(entity: Entity) = object : Trackable {
@@ -49,6 +51,8 @@ interface Trackable {
                     PLUGIN.scheduler().teleport(entity, value)
                 }
             override val async: Boolean
+                get() = false
+            override val isEmpty: Boolean
                 get() = false
             override fun remove() {
                 entity.remove()
@@ -66,11 +70,13 @@ interface Trackable {
                 override val available: Boolean
                     get() = !removed && loc.chunk.isLoaded
                 override var location: Location
-                    get() = loc
+                    get() = loc.clone()
                     set(value) {
                         loc = value
                     }
                 override val async: Boolean
+                    get() = true
+                override val isEmpty: Boolean
                     get() = true
                 override fun remove() {
                     removed = true

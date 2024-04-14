@@ -7,10 +7,12 @@ import kr.toxicity.advancedskills.api.nms.NMS
 import kr.toxicity.advancedskills.api.plugin.ReloadResult
 import kr.toxicity.advancedskills.api.plugin.ReloadState
 import kr.toxicity.advancedskills.api.scheduler.WrappedScheduler
+import kr.toxicity.advancedskills.api.skill.SkillGenerator
 import kr.toxicity.advancedskills.manager.*
 import kr.toxicity.advancedskills.pack.PackData
 import kr.toxicity.advancedskills.scheduler.FoliaScheduler
 import kr.toxicity.advancedskills.scheduler.StandardScheduler
+import kr.toxicity.advancedskills.skill.SkillGeneratorImpl
 import kr.toxicity.advancedskills.util.*
 import net.kyori.adventure.platform.bukkit.BukkitAudiences
 import org.bukkit.Bukkit
@@ -30,6 +32,7 @@ class AdvancedSkillsImpl: AdvancedSkills() {
     }
     private lateinit var scheduler: WrappedScheduler
     private var namespace = "advancedskills"
+    private val skillGenerator = SkillGeneratorImpl()
 
     override fun onEnable() {
         nms = when (val version = Bukkit.getServer()::class.java.`package`.name.split('.')[3]) {
@@ -135,4 +138,5 @@ class AdvancedSkillsImpl: AdvancedSkills() {
     override fun namespace(namespace: String) {
         this.namespace = namespace
     }
+    override fun skillGenerator(): SkillGenerator = skillGenerator
 }

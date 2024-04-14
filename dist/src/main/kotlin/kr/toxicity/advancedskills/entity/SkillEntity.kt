@@ -2,7 +2,6 @@ package kr.toxicity.advancedskills.entity
 
 import kr.toxicity.advancedskills.equation.EquationLocation
 import kr.toxicity.advancedskills.equation.TEquation
-import kr.toxicity.advancedskills.manager.EntityManager
 import kr.toxicity.advancedskills.util.*
 import org.bukkit.Location
 import org.bukkit.World
@@ -18,7 +17,7 @@ class SkillEntity(
     private val location: () -> Location,
     private val equationLocation: EquationLocation,
     private val move: Boolean,
-    private val count: Int,
+    private val count: Int
 ) {
     companion object {
         private val zeroLocation = TEquation("0", 2).let {
@@ -40,8 +39,6 @@ class SkillEntity(
 
     private var remove = false
 
-    fun locationEntity() = EntityManager.location(world(), location())
-
     constructor(caster: Entity, callback: () -> Unit): this(
         AnimatedTrackable(-1, caster.world, Trackable.of(caster)),
         null,
@@ -60,7 +57,7 @@ class SkillEntity(
         null,
         callback,
         {
-            loc
+            loc.clone()
         },
         zeroLocation,
         false,
@@ -72,13 +69,12 @@ class SkillEntity(
     private val tickTask = ArrayList<(Long) -> Unit>().synchronized()
 
 
-    private val tracker = run {
-        val task = {
+    private val tracker = if (!trackable.trackable.isEmpty) {
+        asyncTaskCount(-1, 1, {
             if (parent?.remove == true || trackable.trackable.available) move()
             else removeEntity()
-        }
-        asyncTaskCount(-1, 1, task, callback)
-    }
+        }, callback)
+    } else null
     init {
         if (trackable.duration > 0) {
             asyncTaskLater(trackable.duration) {
@@ -88,7 +84,7 @@ class SkillEntity(
     }
 
     fun cancel() {
-        tracker.cancel()
+        tracker?.cancel()
     }
     fun world() = trackable.world
 
@@ -99,7 +95,7 @@ class SkillEntity(
         childes.forEachSynchronized { _, t ->
             t.removeEntity()
         }
-        trackable.trackable.remove()
+        removeTrackable()
         childes.clear()
     }
 
@@ -113,7 +109,7 @@ class SkillEntity(
             },
             equationLocation,
             true,
-            count
+            count,
         )
         childes.add(result)
         return result
@@ -124,6 +120,13 @@ class SkillEntity(
     }
     fun addTickTask(tick: (Long) -> Unit) {
         tickTask.add(tick)
+    }
+
+    private fun removeTrackable() {
+        val tr = trackable.trackable
+        if (tr.async) tr.remove() else task(tr.location) {
+            tr.remove()
+        }
     }
 
     private fun move() {
@@ -156,9 +159,7 @@ class SkillEntity(
             }
             val tr = trackable.trackable
             if (!tr.available) {
-                if (tr.async) tr.remove() else task(tr.location) {
-                    tr.remove()
-                }
+                removeTrackable()
             } else {
                 val trackableLocation = equationLocation.evaluate(tick.toDouble())
                 vec.x += trackableLocation.x

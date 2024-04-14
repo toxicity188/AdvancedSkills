@@ -3,6 +3,7 @@ package kr.toxicity.advancedskills.api;
 import kr.toxicity.advancedskills.api.nms.NMS;
 import kr.toxicity.advancedskills.api.plugin.ReloadResult;
 import kr.toxicity.advancedskills.api.scheduler.WrappedScheduler;
+import kr.toxicity.advancedskills.api.skill.SkillGenerator;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -86,4 +87,10 @@ public abstract class AdvancedSkills extends JavaPlugin {
      * @param namespace namespace
      */
     public abstract void namespace(@NotNull String namespace);
+
+    /**
+     * Gets a generator of skill.
+     * @return skill generator.
+     */
+    public abstract @NotNull SkillGenerator skillGenerator();
 }
