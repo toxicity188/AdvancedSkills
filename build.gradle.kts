@@ -1,8 +1,9 @@
 plugins {
     `java-library`
     kotlin("jvm") version "1.9.23"
-    id("com.github.johnrengelman.shadow") version("8.1.1")
-    id("io.papermc.paperweight.userdev") version("1.5.12") apply(false)
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("io.papermc.paperweight.userdev") version "1.5.12" apply false
+    id("org.jetbrains.dokka") version "1.9.20"
 }
 
 val api = project(":api")
@@ -46,10 +47,15 @@ allprojects {
         compileJava {
             options.encoding = Charsets.UTF_8.name()
         }
+        javadoc {
+            options.encoding = Charsets.UTF_8.name()
+        }
     }
 }
 
 subprojects {
+    apply(plugin = "org.jetbrains.dokka")
+
     dependencies {
         compileOnly("net.objecthunter:exp4j:0.4.8")
         compileOnly("io.lumine:Mythic-Dist:5.6.1")
@@ -132,6 +138,25 @@ dependencies {
     }
 }
 
+val sourceJar by tasks.creating(Jar::class.java) {
+    dependsOn(tasks.classes)
+    fun getProjectSource(project: Project): Array<File> {
+        return if (project.subprojects.isEmpty()) project.sourceSets.main.get().allSource.srcDirs.toTypedArray() else ArrayList<File>().apply {
+            project.subprojects.forEach {
+                addAll(getProjectSource(it))
+            }
+        }.toTypedArray()
+    }
+    archiveClassifier = "source"
+    from(*getProjectSource(project))
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+val dokkaJar by tasks.creating(Jar::class.java) {
+    dependsOn(tasks.dokkaHtmlMultiModule)
+    archiveClassifier = "dokka"
+    from(layout.buildDirectory.dir("dokka/htmlMultiModule").orNull?.asFile)
+}
+
 tasks {
     jar {
         dependsOn(clean)
@@ -149,6 +174,8 @@ tasks {
             relocate(pattern, "${project.group}.shaded.$pattern")
         }
         prefix("kotlin")
+        finalizedBy(sourceJar)
+        finalizedBy(dokkaJar)
     }
 }
 
